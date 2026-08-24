@@ -18,3 +18,10 @@ print(products.iloc[0])
 
 print("\nNama produk pertama:")
 print(products.iloc[0]["nama"])
+
+print("\nJumlah produk:")
+print(len(products))
+
+print("\nJumlah produk berdasarkan kategori:")
+print(products["kategori"].value_counts())
+

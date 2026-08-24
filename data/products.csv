@@ -9,3 +9,23 @@ id,nama,deskripsi,kategori,harga
 8,Samsung Galaxy,Smartphone Android RAM 8GB Storage 256GB,Smartphone,8000000
 9,Headset Gaming,Headset gaming wireless bluetooth,Audio,800000
 10,Headset Bluetooth,Headset wireless bluetooth noise cancelling,Audio,600000
+11,MacBook Air,Laptop Apple M2 RAM 8GB SSD 256GB,Elektronik,14000000
+12,MacBook Pro,Laptop Apple M3 RAM 16GB SSD 512GB,Elektronik,22000000
+13,ASUS ROG,Laptop gaming Intel i7 RAM 16GB SSD 1TB GPU RTX,Elektronik,20000000
+14,Lenovo Legion,Laptop gaming Ryzen 7 RAM 16GB SSD 1TB GPU RTX,Elektronik,18000000
+15,Acer Nitro,Laptop gaming Intel i5 RAM 16GB SSD 512GB GPU RTX,Elektronik,15000000
+16,Samsung S24,Smartphone Android AMOLED RAM 8GB Storage 256GB,Smartphone,13000000
+17,Samsung A55,Smartphone Android AMOLED RAM 8GB Storage 256GB,Smartphone,6000000
+18,Xiaomi 14,Smartphone Android AMOLED RAM 12GB Storage 512GB,Smartphone,11000000
+19,Redmi Note,Smartphone Android RAM 8GB Storage 256GB,Smartphone,4000000
+20,Oppo Reno,Smartphone Android camera RAM 12GB Storage 256GB,Smartphone,7000000
+21,AirPods,Wireless earbuds bluetooth noise cancelling,Audio,2500000
+22,Sony Headphone,Wireless headphone bluetooth noise cancelling,Audio,3500000
+23,JBL Speaker,Portable bluetooth speaker wireless,Audio,1800000
+24,Mechanical Keyboard RGB,Keyboard mechanical gaming RGB USB,Peripherals,1000000
+25,Wireless Keyboard,Keyboard wireless bluetooth office,Peripherals,500000
+26,Wireless Mouse,Mouse wireless bluetooth office,Peripherals,350000
+27,Gaming Mouse RGB,Mouse gaming wireless RGB DPI tinggi,Peripherals,750000
+28,iPad Pro,Tablet Apple M2 storage 256GB display 12 inch,Tablet,17000000
+29,Galaxy Tab,Tablet Android RAM 8GB storage 256GB display AMOLED,Tablet,9000000
+30,Apple Watch,Smartwatch Apple bluetooth monitoring kesehatan olahraga,Wearable,7000000
