@@ -1,0 +1,31 @@
+id,nama,brand,jenis,kategori,deskripsi,ram_gb,storage_gb,harga
+1,Laptop ASUS,ASUS,Laptop,Elektronik,Intel i5 RAM 16GB SSD 512GB,16,512,10000000
+2,Laptop Lenovo,Lenovo,Laptop,Elektronik,Intel i5 RAM 16GB SSD 512GB,16,512,9500000
+3,Laptop Acer,Acer,Laptop,Elektronik,Ryzen 5 RAM 8GB SSD 512GB,8,512,8500000
+4,Laptop HP,HP,Laptop,Elektronik,Intel i5 RAM 8GB SSD 512GB,8,512,9000000
+5,Laptop Dell,Dell,Laptop,Elektronik,Intel i7 RAM 16GB SSD 512GB,16,512,12000000
+6,iPhone 15,Apple,Smartphone,Smartphone,RAM 6GB Storage 128GB,6,128,12000000
+7,iPhone 16,Apple,Smartphone,Smartphone,RAM 8GB Storage 256GB,8,256,15000000
+8,Samsung Galaxy,Samsung,Smartphone,Smartphone,Android RAM 8GB Storage 256GB,8,256,8000000
+9,Headset Gaming,Generic,Headset,Audio,Gaming wireless bluetooth,,0,800000
+10,Headset Bluetooth,Generic,Headset,Audio,Wireless bluetooth noise cancelling,,0,600000
+11,MacBook Air,Apple,Laptop,Elektronik,Apple M2 RAM 8GB SSD 256GB,8,256,14000000
+12,MacBook Pro,Apple,Laptop,Elektronik,Apple M3 RAM 16GB SSD 512GB,16,512,22000000
+13,ASUS ROG,ASUS,Laptop,Elektronik,Gaming Intel i7 RAM 16GB SSD 1TB GPU RTX,16,1024,20000000
+14,Lenovo Legion,Lenovo,Laptop,Elektronik,Gaming Ryzen 7 RAM 16GB SSD 1TB GPU RTX,16,1024,18000000
+15,Acer Nitro,Acer,Laptop,Elektronik,Gaming Intel i5 RAM 16GB SSD 512GB GPU RTX,16,512,15000000
+16,Samsung S24,Samsung,Smartphone,Smartphone,Android AMOLED RAM 8GB Storage 256GB,8,256,13000000
+17,Samsung A55,Samsung,Smartphone,Smartphone,Android AMOLED RAM 8GB Storage 256GB,8,256,6000000
+18,Xiaomi 14,Xiaomi,Smartphone,Smartphone,Android AMOLED RAM 12GB Storage 512GB,12,512,11000000
+19,Redmi Note,Xiaomi,Smartphone,Smartphone,Android RAM 8GB Storage 256GB,8,256,4000000
+20,Oppo Reno,Oppo,Smartphone,Smartphone,Android camera RAM 12GB Storage 256GB,12,256,7000000
+21,AirPods,Apple,Earbuds,Audio,Wireless earbuds bluetooth noise cancelling,,0,2500000
+22,Sony Headphone,Sony,Headset,Audio,Wireless headphone bluetooth noise cancelling,,0,3500000
+23,JBL Speaker,JBL,Speaker,Audio,Portable bluetooth speaker wireless,,0,1800000
+24,Mechanical Keyboard RGB,Generic,Keyboard,Peripherals,Mechanical gaming RGB USB,,0,1000000
+25,Wireless Keyboard,Generic,Keyboard,Peripherals,Wireless bluetooth office keyboard,,0,500000
+26,Wireless Mouse,Generic,Mouse,Peripherals,Wireless bluetooth office mouse,,0,350000
+27,Gaming Mouse RGB,Generic,Mouse,Peripherals,Gaming wireless RGB DPI tinggi,,0,750000
+28,iPad Pro,Apple,Tablet,Tablet,Apple M2 storage 256GB display 12 inch,,256,17000000
+29,Galaxy Tab,Samsung,Tablet,Tablet,Android RAM 8GB storage 256GB AMOLED,8,256,9000000
+30,Apple Watch,Apple,Smartwatch,Wearable,Bluetooth monitoring olahraga dan kesehatan,,0,7000000
