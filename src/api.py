@@ -1,18 +1,130 @@
+from contextlib import asynccontextmanager
+from pathlib import Path
+
 import pandas as pd
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
 from src.recommender import ProductRecommender
+from src.relevance import RelevanceEvaluator
 
-from fastapi import FastAPI, HTTPException, Query
 
+# =========================
+# PATH
+# =========================
+
+BASE_DIR = Path(__file__).resolve().parents[1]
+FRONTEND_DIR = BASE_DIR / "frontend"
+
+
+# =========================
+# RESPONSE MODELS
+# =========================
+
+class ProductResponse(BaseModel):
+
+    id: int
+    nama: str
+    brand: str
+    jenis: str
+    kategori: str
+    deskripsi: str
+    ram_gb: int | None
+    storage_gb: int | None
+    harga: float
+
+
+class RecommendationResponse(BaseModel):
+
+    id: int
+    nama: str
+    brand: str
+    kategori: str
+    harga: float
+    similarity: float
+    reasons: list[str]
+
+
+class RecommendationResult(BaseModel):
+
+    product: dict
+    recommendations: list[RecommendationResponse]
+
+
+# =========================
+# APP LIFESPAN
+# =========================
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+
+    recommender = ProductRecommender(
+        feature_mode="combined"
+    )
+
+    relevance_evaluator = RelevanceEvaluator(
+        threshold=2
+    )
+
+    app.state.recommender = recommender
+    app.state.relevance_evaluator = (
+        relevance_evaluator
+    )
+
+    app.state.product_index = {
+        int(product_id): index
+        for index, product_id
+        in enumerate(
+            recommender.products["id"]
+        )
+    }
+
+    yield
+
+    recommender.close()
+
+
+# =========================
+# FASTAPI
+# =========================
 
 app = FastAPI(
     title="Product Recommendation API",
     description="API untuk sistem rekomendasi produk",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
+
+# =========================
+# STATIC FILES
+# =========================
+
+app.mount(
+    "/static",
+    StaticFiles(directory=FRONTEND_DIR),
+    name="static"
+)
+
+
+# =========================
+# HOME
+# =========================
+
+@app.get("/")
+def home():
+
+    return FileResponse(
+        FRONTEND_DIR / "index.html"
+    )
+
+
+# =========================
+# HEALTH
+# =========================
 
 @app.get("/health")
 def health_check():
@@ -22,11 +134,18 @@ def health_check():
     }
 
 
-@app.get("/products")
-def get_products():
+# =========================
+# PRODUCTS
+# =========================
 
-    recommender = ProductRecommender(
-        feature_mode="combined"
+@app.get(
+    "/products",
+    response_model=list[ProductResponse]
+)
+def get_products(request: Request):
+
+    recommender = (
+        request.app.state.recommender
     )
 
     products = recommender.products[
@@ -43,8 +162,6 @@ def get_products():
         ]
     ].copy()
 
-    recommender.close()
-
     products = products.astype(object).where(
         pd.notna(products),
         None
@@ -54,9 +171,18 @@ def get_products():
         orient="records"
     )
 
-@app.get("/products/{product_id}/recommendations")
+
+# =========================
+# RECOMMENDATIONS
+# =========================
+
+@app.get(
+    "/products/{product_id}/recommendations",
+    response_model=RecommendationResult
+)
 def get_recommendations(
     product_id: int,
+    request: Request,
     top_n: int = Query(
         default=3,
         ge=1,
@@ -64,33 +190,33 @@ def get_recommendations(
     )
 ):
 
-    recommender = ProductRecommender(
-        feature_mode="combined"
+    recommender = (
+        request.app.state.recommender
     )
 
-    products = recommender.products
+    relevance_evaluator = (
+        request.app.state.relevance_evaluator
+    )
 
-    matching_rows = products.index[
-        products["id"] == product_id
-    ].tolist()
+    product_index = (
+        request.app.state.product_index.get(
+            product_id
+        )
+    )
 
-    if not matching_rows:
-
-        recommender.close()
+    if product_index is None:
 
         raise HTTPException(
             status_code=404,
             detail="Product not found"
         )
 
-    product_index = matching_rows[0]
-
     recommendations = recommender.recommend(
         product_index,
         top_n
     )
 
-    product = products.iloc[
+    product = recommender.products.iloc[
         product_index
     ]
 
@@ -98,21 +224,39 @@ def get_recommendations(
 
     for index, similarity_score in recommendations:
 
-        recommendation = products.iloc[index]
+        recommendation = (
+            recommender.products.iloc[index]
+        )
+
+        reasons = (
+            relevance_evaluator.get_reasons(
+                product,
+                recommendation
+            )
+        )
 
         result.append({
-            "id": int(recommendation["id"]),
-            "nama": recommendation["nama"],
-            "brand": recommendation["brand"],
-            "kategori": recommendation["kategori"],
-            "harga": float(recommendation["harga"]),
+            "id": int(
+                recommendation["id"]
+            ),
+            "nama": (
+                recommendation["nama"]
+            ),
+            "brand": (
+                recommendation["brand"]
+            ),
+            "kategori": (
+                recommendation["kategori"]
+            ),
+            "harga": float(
+                recommendation["harga"]
+            ),
             "similarity": round(
                 float(similarity_score),
                 3
-            )
+            ),
+            "reasons": reasons
         })
-
-    recommender.close()
 
     return {
         "product": {
