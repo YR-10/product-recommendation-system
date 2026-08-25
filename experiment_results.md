@@ -56,3 +56,34 @@ daripada Model A pada kedua threshold yang diuji.
 
 Hasil ini masih merupakan eksperimen awal menggunakan dataset
 simulasi dan ground truth berbasis atribut.
+
+## Final Database-Based Evaluation
+
+Untuk pipeline aplikasi final, database MySQL digunakan sebagai
+sumber data utama. Atribut yang tidak berlaku untuk suatu produk
+direpresentasikan sebagai NULL dan tidak memberikan kontribusi
+terhadap relevance score.
+
+Ground truth:
+- jenis
+- kategori
+- RAM jika tersedia pada kedua produk
+- storage jika tersedia pada kedua produk
+
+Threshold:
+- score >= 2 dianggap relevan
+
+### Final Results
+
+| Model | Features | Precision@3 | Recall@3 |
+|-------|----------|-------------|----------|
+| Model A | Deskripsi | 0.667 | 0.311 |
+| Model B | Nama + Deskripsi + Kategori | 0.733 | 0.519 |
+
+### Final Observation
+
+Model B menghasilkan Precision@3 dan Recall@3 yang lebih tinggi
+daripada Model A pada pipeline berbasis database.
+
+Model B digunakan sebagai recommendation model utama aplikasi,
+sedangkan Model A digunakan sebagai baseline pembanding.
