@@ -1,10 +1,15 @@
+// =========================
+// DOM ELEMENTS
+// =========================
+
 const productGrid =
     document.getElementById("product-grid");
 
 const recommendationGrid =
-    document.getElementById(
-        "recommendation-grid"
-    );
+    document.getElementById("recommendation-grid");
+
+const wishlistGrid =
+    document.getElementById("wishlist-grid");
 
 const productCount =
     document.getElementById("product-count");
@@ -22,19 +27,19 @@ const productSection =
     document.getElementById("products");
 
 const detailSection =
-    document.getElementById(
-        "product-detail"
-    );
+    document.getElementById("product-detail");
 
 const detailContent =
-    document.getElementById(
-        "detail-content"
-    );
+    document.getElementById("detail-content");
 
 const backButton =
-    document.getElementById(
-        "back-button"
-    );
+    document.getElementById("back-button");
+
+const wishlistCount =
+    document.getElementById("wishlist-count");
+
+const themeToggle =
+    document.getElementById("theme-toggle");
 
 const categoryButtons =
     document.querySelectorAll(
@@ -42,9 +47,584 @@ const categoryButtons =
     );
 
 
+// =========================
+// AUTH DOM
+// =========================
+
+const loginButton =
+    document.getElementById("login-button");
+
+const logoutButton =
+    document.getElementById("logout-button");
+
+const userName =
+    document.getElementById("user-name");
+
+const authModal =
+    document.getElementById("auth-modal");
+
+const authClose =
+    document.getElementById("auth-close");
+
+const loginForm =
+    document.getElementById("login-form");
+
+const loginMessage =
+    document.getElementById("login-message");
+
+
+// =========================
+// APP STATE
+// =========================
+
 let products = [];
 
 let activeCategory = "";
+
+let wishlistIds = [];
+
+let currentUser = null;
+
+const TOKEN_KEY =
+    "productrec_access_token";
+
+
+// =========================
+// TOKEN HELPERS
+// =========================
+
+function getToken() {
+
+    return sessionStorage.getItem(
+        TOKEN_KEY
+    );
+}
+
+
+function setToken(token) {
+
+    sessionStorage.setItem(
+        TOKEN_KEY,
+        token
+    );
+}
+
+
+function clearToken() {
+
+    sessionStorage.removeItem(
+        TOKEN_KEY
+    );
+}
+
+
+function isLoggedIn() {
+
+    return Boolean(
+        getToken()
+    );
+}
+
+
+// =========================
+// API REQUEST
+// =========================
+
+async function apiRequest(
+    url,
+    options = {}
+) {
+
+    const headers = {
+        ...(options.headers || {})
+    };
+
+    const token = getToken();
+
+    if (token) {
+
+        headers.Authorization =
+            `Bearer ${token}`;
+    }
+
+    const response =
+        await fetch(
+            url,
+            {
+                ...options,
+                headers
+            }
+        );
+
+
+    // Token invalid / expired
+    if (
+        response.status === 401
+        &&
+        !url.startsWith("/auth/login")
+    ) {
+
+        handleLogout(
+            false
+        );
+
+        throw new Error(
+            "Sesi login sudah berakhir. Silakan login kembali."
+        );
+    }
+
+
+    return response;
+}
+
+
+// =========================
+// AUTH UI
+// =========================
+
+function openLoginModal() {
+
+    if (!authModal) {
+        return;
+    }
+
+
+    authModal.classList.remove(
+        "hidden"
+    );
+
+
+    if (loginMessage) {
+
+        loginMessage.textContent =
+            "";
+    }
+
+
+    const usernameInput =
+        document.getElementById(
+            "login-username"
+        );
+
+    if (usernameInput) {
+
+        usernameInput.focus();
+    }
+}
+
+
+function closeLoginModal() {
+
+    if (!authModal) {
+        return;
+    }
+
+
+    authModal.classList.add(
+        "hidden"
+    );
+}
+
+
+function updateAuthUI() {
+
+    const loggedIn =
+        Boolean(currentUser);
+
+
+    if (loginButton) {
+
+        loginButton.classList.toggle(
+            "hidden",
+            loggedIn
+        );
+    }
+
+
+    if (logoutButton) {
+
+        logoutButton.classList.toggle(
+            "hidden",
+            !loggedIn
+        );
+    }
+
+
+    if (userName) {
+
+        userName.classList.toggle(
+            "hidden",
+            !loggedIn
+        );
+
+
+        userName.textContent =
+            loggedIn
+                ? `Hi, ${currentUser.username}`
+                : "";
+    }
+}
+
+
+// =========================
+// LOAD CURRENT USER
+// =========================
+
+async function loadCurrentUser() {
+
+    const token =
+        getToken();
+
+
+    if (!token) {
+
+        currentUser = null;
+
+        updateAuthUI();
+
+        return false;
+    }
+
+
+    try {
+
+        const response =
+            await apiRequest(
+                "/auth/me"
+            );
+
+
+        if (!response.ok) {
+
+            clearToken();
+
+            currentUser = null;
+
+            updateAuthUI();
+
+            return false;
+        }
+
+
+        currentUser =
+            await response.json();
+
+
+        updateAuthUI();
+
+        return true;
+
+
+    } catch (error) {
+
+        console.error(
+            "Load current user error:",
+            error
+        );
+
+        currentUser = null;
+
+        updateAuthUI();
+
+        return false;
+    }
+}
+
+
+// =========================
+// LOGIN
+// =========================
+
+async function loginUser(
+    username,
+    password
+) {
+
+    const body =
+        new URLSearchParams();
+
+
+    body.append(
+        "username",
+        username
+    );
+
+
+    body.append(
+        "password",
+        password
+    );
+
+
+    const response =
+        await fetch(
+            "/auth/login",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/x-www-form-urlencoded"
+                },
+
+                body
+            }
+        );
+
+
+    let data = {};
+
+    try {
+
+        data =
+            await response.json();
+
+    } catch {
+
+        data = {};
+    }
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            data.detail ||
+            "Username atau password salah."
+        );
+    }
+
+
+    if (!data.access_token) {
+
+        throw new Error(
+            "Token login tidak diterima."
+        );
+    }
+
+
+    setToken(
+        data.access_token
+    );
+
+
+    return data;
+}
+
+
+// =========================
+// LOGOUT
+// =========================
+
+function handleLogout(
+    closeModal = true
+) {
+
+    clearToken();
+
+    currentUser = null;
+
+    wishlistIds = [];
+
+
+    updateAuthUI();
+
+    updateWishlistCount();
+
+
+    // Render ulang produk supaya icon wishlist kembali ♡
+    renderProducts(
+        getFilteredProducts()
+    );
+
+
+    // Wishlist user hilang dari UI
+    renderWishlist();
+
+
+    if (closeModal) {
+
+        closeLoginModal();
+    }
+}
+
+
+// =========================
+// LOGIN FORM
+// =========================
+
+if (loginForm) {
+
+    loginForm.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+
+            const usernameInput =
+                document.getElementById(
+                    "login-username"
+                );
+
+
+            const passwordInput =
+                document.getElementById(
+                    "login-password"
+                );
+
+
+            const username =
+                usernameInput
+                    ? usernameInput.value.trim()
+                    : "";
+
+
+            const password =
+                passwordInput
+                    ? passwordInput.value
+                    : "";
+
+
+            if (!username || !password) {
+
+                if (loginMessage) {
+
+                    loginMessage.textContent =
+                        "Username dan password wajib diisi.";
+                }
+
+                return;
+            }
+
+
+            try {
+
+                if (loginMessage) {
+
+                    loginMessage.textContent =
+                        "Memproses login...";
+                }
+
+
+                // 1. Login → dapat JWT
+                await loginUser(
+                    username,
+                    password
+                );
+
+
+                // 2. Validasi token + ambil user
+                const userLoaded =
+                    await loadCurrentUser();
+
+
+                if (!userLoaded) {
+
+                    clearToken();
+
+                    throw new Error(
+                        "Login berhasil, tetapi data user tidak dapat diambil."
+                    );
+                }
+
+
+                // 3. Ambil wishlist user
+                await loadWishlistFromApi();
+
+
+                // 4. Baru tutup modal
+                closeLoginModal();
+
+
+                loginForm.reset();
+
+
+                // 5. Refresh UI
+                renderProducts(
+                    getFilteredProducts()
+                );
+
+                renderWishlist();
+
+
+            } catch (error) {
+
+                console.error(
+                    "Login error:",
+                    error
+                );
+
+
+                clearToken();
+
+                currentUser = null;
+
+                wishlistIds = [];
+
+
+                updateAuthUI();
+
+                updateWishlistCount();
+
+                renderWishlist();
+
+
+                if (loginMessage) {
+
+                    loginMessage.textContent =
+                        error.message ||
+                        "Login gagal.";
+                }
+            }
+        }
+    );
+}
+
+
+// =========================
+// LOGIN BUTTON
+// =========================
+
+if (loginButton) {
+
+    loginButton.addEventListener(
+        "click",
+        openLoginModal
+    );
+}
+
+
+// =========================
+// LOGOUT BUTTON
+// =========================
+
+if (logoutButton) {
+
+    logoutButton.addEventListener(
+        "click",
+        event => {
+
+            event.preventDefault();
+
+            handleLogout(
+                true
+            );
+        }
+    );
+}
+
+
+// =========================
+// CLOSE LOGIN
+// =========================
+
+if (authClose) {
+
+    authClose.addEventListener(
+        "click",
+        closeLoginModal
+    );
+}
 
 
 // =========================
@@ -56,41 +636,576 @@ async function loadProducts() {
     try {
 
         const response =
-            await fetch("/products");
+            await fetch(
+                "/products"
+            );
+
 
         if (!response.ok) {
+
             throw new Error(
                 "Gagal mengambil produk."
             );
         }
 
+
         products =
             await response.json();
 
-        productCount.textContent =
-            `${products.length} produk tersedia`;
+
+        activeCategory = "";
+
+
+        if (searchInput) {
+
+            searchInput.value =
+                "";
+        }
+
+
+        if (heroSearch) {
+
+            heroSearch.value =
+                "";
+        }
+
+
+        if (sortSelect) {
+
+            sortSelect.value =
+                "default";
+        }
+
+
+        categoryButtons.forEach(
+            button =>
+                button.classList.remove(
+                    "active"
+                )
+        );
+
 
         const allButton =
             document.querySelector(
                 '.category-button[data-category=""]'
             );
 
+
         if (allButton) {
-            allButton.classList.add("active");
+
+            allButton.classList.add(
+                "active"
+            );
         }
 
-        renderProducts(products);
+
+        renderProducts(
+            products
+        );
+
+
+        if (productCount) {
+
+            productCount.textContent =
+                `${products.length} produk tersedia`;
+        }
+
+
+        // Cek session login
+        await loadCurrentUser();
+
+
+        // Ambil wishlist kalau sudah login
+        await loadWishlistFromApi();
+
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Load products error:",
+            error
+        );
 
-        productGrid.innerHTML = `
-            <p>
-                Gagal memuat produk.
-            </p>
-        `;
+
+        if (productGrid) {
+
+            productGrid.innerHTML = `
+                <div class="empty-state">
+
+                    <div class="empty-icon">
+                        ⚠️
+                    </div>
+
+                    <h3>
+                        Gagal memuat produk
+                    </h3>
+
+                    <p>
+                        Pastikan server API sedang berjalan.
+                    </p>
+
+                </div>
+            `;
+        }
     }
+}
+
+
+// =========================
+// WISHLIST API
+// =========================
+
+async function loadWishlistFromApi() {
+
+    if (!isLoggedIn()) {
+
+        wishlistIds = [];
+
+        updateWishlistCount();
+
+        renderWishlist();
+
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await apiRequest(
+                "/wishlist"
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Gagal mengambil wishlist."
+            );
+        }
+
+
+        const data =
+            await response.json();
+
+
+        wishlistIds =
+            data.map(
+                product =>
+                    Number(product.id)
+            );
+
+
+        updateWishlistCount();
+
+
+        renderProducts(
+            getFilteredProducts()
+        );
+
+
+        renderWishlist();
+
+
+    } catch (error) {
+
+        console.error(
+            "Wishlist load error:",
+            error
+        );
+    }
+}
+
+
+// =========================
+// ADD WISHLIST
+// =========================
+
+async function addToWishlist(
+    productId
+) {
+
+    if (!isLoggedIn()) {
+
+        openLoginModal();
+
+        return false;
+    }
+
+
+    const response =
+        await apiRequest(
+            `/wishlist/${productId}`,
+            {
+                method: "POST"
+            }
+        );
+
+
+    let data = {};
+
+    try {
+
+        data =
+            await response.json();
+
+    } catch {
+
+        data = {};
+    }
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            data.detail ||
+            "Gagal menambahkan wishlist."
+        );
+    }
+
+
+    const numericId =
+        Number(productId);
+
+
+    if (
+        !wishlistIds.includes(
+            numericId
+        )
+    ) {
+
+        wishlistIds.push(
+            numericId
+        );
+    }
+
+
+    updateWishlistCount();
+
+    return true;
+}
+
+
+// =========================
+// REMOVE WISHLIST
+// =========================
+
+async function removeFromWishlist(
+    productId
+) {
+
+    if (!isLoggedIn()) {
+
+        openLoginModal();
+
+        return false;
+    }
+
+
+    const response =
+        await apiRequest(
+            `/wishlist/${productId}`,
+            {
+                method: "DELETE"
+            }
+        );
+
+
+    let data = {};
+
+    try {
+
+        data =
+            await response.json();
+
+    } catch {
+
+        data = {};
+    }
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            data.detail ||
+            "Gagal menghapus wishlist."
+        );
+    }
+
+
+    const numericId =
+        Number(productId);
+
+
+    wishlistIds =
+        wishlistIds.filter(
+            id =>
+                id !== numericId
+        );
+
+
+    updateWishlistCount();
+
+    return true;
+}
+
+
+// =========================
+// TOGGLE WISHLIST
+// =========================
+
+async function toggleWishlist(
+    productId
+) {
+
+    try {
+
+        if (
+            isWishlisted(
+                productId
+            )
+        ) {
+
+            await removeFromWishlist(
+                productId
+            );
+
+        } else {
+
+            await addToWishlist(
+                productId
+            );
+        }
+
+
+        renderProducts(
+            getFilteredProducts()
+        );
+
+
+        renderWishlist();
+
+
+        // Kalau sedang di detail produk,
+        // refresh tombol wishlist
+        const product =
+            products.find(
+                item =>
+                    Number(item.id) ===
+                    Number(productId)
+            );
+
+
+        if (
+            product
+            &&
+            detailSection
+            &&
+            !detailSection.classList.contains(
+                "hidden"
+            )
+        ) {
+
+            renderProductDetail(
+                product
+            );
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "Wishlist error:",
+            error
+        );
+
+
+        alert(
+            error.message
+        );
+    }
+}
+
+
+// =========================
+// WISHLIST STATE
+// =========================
+
+function isWishlisted(
+    productId
+) {
+
+    return wishlistIds.includes(
+        Number(productId)
+    );
+}
+
+
+function updateWishlistCount() {
+
+    if (!wishlistCount) {
+
+        return;
+    }
+
+
+    wishlistCount.textContent =
+        wishlistIds.length;
+}
+
+
+function renderWishlist() {
+
+    if (!wishlistGrid) {
+
+        return;
+    }
+
+
+    if (!isLoggedIn()) {
+
+        wishlistGrid.innerHTML = `
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    🔐
+                </div>
+
+                <h3>
+                    Login untuk melihat wishlist
+                </h3>
+
+                <p>
+                    Wishlist tersimpan
+                    berdasarkan akunmu.
+                </p>
+
+            </div>
+        `;
+
+        return;
+    }
+
+
+    const wishlistProducts =
+        products.filter(
+            product =>
+                isWishlisted(
+                    product.id
+                )
+        );
+
+
+    wishlistGrid.innerHTML =
+        "";
+
+
+    if (!wishlistProducts.length) {
+
+        wishlistGrid.innerHTML = `
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    ♡
+                </div>
+
+                <h3>
+                    Wishlist masih kosong
+                </h3>
+
+                <p>
+                    Simpan produk yang ingin
+                    kamu lihat nanti.
+                </p>
+
+            </div>
+        `;
+
+        return;
+    }
+
+
+    wishlistProducts.forEach(
+        product => {
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+
+            card.className =
+                "product-card";
+
+
+            card.innerHTML = `
+                <button
+                    class="wishlist-button active"
+                    type="button"
+                    aria-label="Hapus dari wishlist"
+                >
+                    ♥
+                </button>
+
+                <div class="product-type">
+                    ${escapeHtml(
+                        product.kategori
+                    )}
+                </div>
+
+                <h3>
+                    ${escapeHtml(
+                        product.nama
+                    )}
+                </h3>
+
+                <div class="product-brand">
+                    ${escapeHtml(
+                        product.brand
+                    )}
+                </div>
+
+                <div class="product-price">
+                    ${formatPrice(
+                        product.harga
+                    )}
+                </div>
+            `;
+
+
+            card.addEventListener(
+                "click",
+                () =>
+                    openProduct(
+                        product.id
+                    )
+            );
+
+
+            const button =
+                card.querySelector(
+                    ".wishlist-button"
+                );
+
+
+            button.addEventListener(
+                "click",
+                async event => {
+
+                    event.stopPropagation();
+
+                    await toggleWishlist(
+                        product.id
+                    );
+                }
+            );
+
+
+            wishlistGrid.appendChild(
+                card
+            );
+        }
+    );
 }
 
 
@@ -101,100 +1216,116 @@ async function loadProducts() {
 function getFilteredProducts() {
 
     const keyword =
-        searchInput.value
-            .toLowerCase()
-            .trim();
+        searchInput
+            ? searchInput.value
+                .toLowerCase()
+                .trim()
+            : "";
+
 
     let filtered =
-        products.filter(product => {
+        products.filter(
+            product => {
 
-            const matchesKeyword =
-                product.nama
-                    .toLowerCase()
-                    .includes(keyword)
-
-                ||
-
-                product.brand
-                    .toLowerCase()
-                    .includes(keyword)
-
-                ||
-
-                product.kategori
-                    .toLowerCase()
-                    .includes(keyword)
-
-                ||
-
-                product.jenis
-                    .toLowerCase()
-                    .includes(keyword);
-
-            const matchesCategory =
-                !activeCategory
-                ||
-                product.kategori === activeCategory;
-
-            return (
-                matchesKeyword
-                &&
-                matchesCategory
-            );
-        });
+                const matchesKeyword =
+                    !keyword
+                    ||
+                    product.nama
+                        .toLowerCase()
+                        .includes(
+                            keyword
+                        )
+                    ||
+                    product.brand
+                        .toLowerCase()
+                        .includes(
+                            keyword
+                        )
+                    ||
+                    product.kategori
+                        .toLowerCase()
+                        .includes(
+                            keyword
+                        )
+                    ||
+                    product.jenis
+                        .toLowerCase()
+                        .includes(
+                            keyword
+                        );
 
 
-    // =========================
-    // SORT
-    // =========================
-
-    switch (sortSelect.value) {
-
-        case "price-low":
-
-            filtered.sort(
-                (a, b) =>
-                    a.harga - b.harga
-            );
-
-            break;
+                const matchesCategory =
+                    !activeCategory
+                    ||
+                    product.kategori ===
+                        activeCategory;
 
 
-        case "price-high":
-
-            filtered.sort(
-                (a, b) =>
-                    b.harga - a.harga
-            );
-
-            break;
-
-
-        case "name-az":
-
-            filtered.sort(
-                (a, b) =>
-                    a.nama.localeCompare(
-                        b.nama,
-                        "id"
-                    )
-            );
-
-            break;
+                return (
+                    matchesKeyword
+                    &&
+                    matchesCategory
+                );
+            }
+        );
 
 
-        case "name-za":
+    if (sortSelect) {
 
-            filtered.sort(
-                (a, b) =>
-                    b.nama.localeCompare(
-                        a.nama,
-                        "id"
-                    )
-            );
+        switch (
+            sortSelect.value
+        ) {
 
-            break;
+            case "price-low":
+
+                filtered.sort(
+                    (a, b) =>
+                        a.harga -
+                        b.harga
+                );
+
+                break;
+
+
+            case "price-high":
+
+                filtered.sort(
+                    (a, b) =>
+                        b.harga -
+                        a.harga
+                );
+
+                break;
+
+
+            case "name-az":
+
+                filtered.sort(
+                    (a, b) =>
+                        a.nama.localeCompare(
+                            b.nama,
+                            "id"
+                        )
+                );
+
+                break;
+
+
+            case "name-za":
+
+                filtered.sort(
+                    (a, b) =>
+                        b.nama.localeCompare(
+                            a.nama,
+                            "id"
+                        )
+                );
+
+                break;
+        }
     }
+
 
     return filtered;
 }
@@ -205,10 +1336,17 @@ function applyFilters() {
     const filtered =
         getFilteredProducts();
 
-    renderProducts(filtered);
 
-    productCount.textContent =
-        `${filtered.length} produk ditemukan`;
+    renderProducts(
+        filtered
+    );
+
+
+    if (productCount) {
+
+        productCount.textContent =
+            `${filtered.length} produk ditemukan`;
+    }
 }
 
 
@@ -220,12 +1358,21 @@ function renderProducts(
     productList
 ) {
 
-    productGrid.innerHTML = "";
+    if (!productGrid) {
 
-    if (productList.length === 0) {
+        return;
+    }
+
+
+    productGrid.innerHTML =
+        "";
+
+
+    if (!productList.length) {
 
         productGrid.innerHTML = `
             <div class="empty-state">
+
                 <div class="empty-icon">
                     🔎
                 </div>
@@ -237,6 +1384,7 @@ function renderProducts(
                 <p>
                     Coba kata kunci atau kategori lain.
                 </p>
+
             </div>
         `;
 
@@ -244,44 +1392,110 @@ function renderProducts(
     }
 
 
-    productList.forEach(product => {
+    productList.forEach(
+        product => {
 
-        const card =
-            document.createElement("div");
+            const card =
+                document.createElement(
+                    "div"
+                );
 
-        card.className =
-            "product-card";
 
-        card.innerHTML = `
-            <div class="product-type">
-                ${escapeHtml(product.kategori)}
-            </div>
+            card.className =
+                "product-card";
 
-            <h3>
-                ${escapeHtml(product.nama)}
-            </h3>
 
-            <div class="product-brand">
-                ${escapeHtml(product.brand)}
-            </div>
+            const wishlisted =
+                isWishlisted(
+                    product.id
+                );
 
-            <div class="product-price">
-                ${formatPrice(product.harga)}
-            </div>
-        `;
 
-        card.addEventListener(
-            "click",
-            () => openProduct(product.id)
-        );
+            card.innerHTML = `
+                <button
+                    class="wishlist-button ${
+                        wishlisted
+                            ? "active"
+                            : ""
+                    }"
+                    type="button"
+                    aria-label="${
+                        wishlisted
+                            ? "Hapus dari wishlist"
+                            : "Tambah ke wishlist"
+                    }"
+                >
+                    ${
+                        wishlisted
+                            ? "♥"
+                            : "♡"
+                    }
+                </button>
 
-        productGrid.appendChild(card);
-    });
+                <div class="product-type">
+                    ${escapeHtml(
+                        product.kategori
+                    )}
+                </div>
+
+                <h3>
+                    ${escapeHtml(
+                        product.nama
+                    )}
+                </h3>
+
+                <div class="product-brand">
+                    ${escapeHtml(
+                        product.brand
+                    )}
+                </div>
+
+                <div class="product-price">
+                    ${formatPrice(
+                        product.harga
+                    )}
+                </div>
+            `;
+
+
+            const wishlistButton =
+                card.querySelector(
+                    ".wishlist-button"
+                );
+
+
+            wishlistButton.addEventListener(
+                "click",
+                async event => {
+
+                    event.stopPropagation();
+
+                    await toggleWishlist(
+                        product.id
+                    );
+                }
+            );
+
+
+            card.addEventListener(
+                "click",
+                () =>
+                    openProduct(
+                        product.id
+                    )
+            );
+
+
+            productGrid.appendChild(
+                card
+            );
+        }
+    );
 }
 
 
 // =========================
-// OPEN PRODUCT
+// PRODUCT DETAIL
 // =========================
 
 async function openProduct(
@@ -292,37 +1506,59 @@ async function openProduct(
 
         const product =
             products.find(
-                item => item.id === productId
+                item =>
+                    Number(item.id) ===
+                    Number(productId)
             );
 
+
         if (!product) {
+
             throw new Error(
                 "Produk tidak ditemukan."
             );
         }
 
 
-        productSection.classList.add(
-            "hidden"
+        if (productSection) {
+
+            productSection.classList.add(
+                "hidden"
+            );
+        }
+
+
+        if (detailSection) {
+
+            detailSection.classList.remove(
+                "hidden"
+            );
+        }
+
+
+        renderProductDetail(
+            product
         );
 
-        detailSection.classList.remove(
-            "hidden"
-        );
 
+        if (
+            recommendationGrid
+        ) {
 
-        renderProductDetail(product);
+            recommendationGrid.innerHTML = `
+                <div class="empty-state">
 
+                    <p>
+                        Memuat rekomendasi...
+                    </p>
 
-        recommendationGrid.innerHTML = `
-            <p>
-                Memuat rekomendasi...
-            </p>
-        `;
+                </div>
+            `;
+        }
 
 
         const response =
-            await fetch(
+            await apiRequest(
                 `/products/${productId}/recommendations?top_n=3`
             );
 
@@ -340,7 +1576,7 @@ async function openProduct(
 
 
         renderRecommendations(
-            data.recommendations
+            data.recommendations || []
         );
 
 
@@ -349,69 +1585,138 @@ async function openProduct(
             behavior: "smooth"
         });
 
+
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Open product error:",
+            error
+        );
 
-        recommendationGrid.innerHTML = `
-            <div class="empty-state">
-                <h3>
-                    Gagal memuat rekomendasi
-                </h3>
-            </div>
-        `;
+
+        if (
+            recommendationGrid
+        ) {
+
+            recommendationGrid.innerHTML = `
+                <div class="empty-state">
+
+                    <div class="empty-icon">
+                        ⚠️
+                    </div>
+
+                    <h3>
+                        Gagal memuat rekomendasi
+                    </h3>
+
+                    <p>
+                        Coba lagi beberapa saat.
+                    </p>
+
+                </div>
+            `;
+        }
     }
 }
 
 
 // =========================
-// PRODUCT DETAIL
+// PRODUCT DETAIL RENDER
 // =========================
 
 function renderProductDetail(
     product
 ) {
 
+    if (!detailContent) {
+
+        return;
+    }
+
+
+    const wishlisted =
+        isWishlisted(
+            product.id
+        );
+
+
     detailContent.innerHTML = `
         <div class="product-type">
-            ${escapeHtml(product.kategori)}
+            ${escapeHtml(
+                product.kategori
+            )}
         </div>
 
         <h1>
-            ${escapeHtml(product.nama)}
+            ${escapeHtml(
+                product.nama
+            )}
         </h1>
 
         <p class="product-brand">
-            ${escapeHtml(product.brand)}
+            ${escapeHtml(
+                product.brand
+            )}
         </p>
 
         <p class="product-price">
-            ${formatPrice(product.harga)}
+            ${formatPrice(
+                product.harga
+            )}
         </p>
 
         <p class="detail-description">
-            ${escapeHtml(product.deskripsi)}
+            ${escapeHtml(
+                product.deskripsi
+            )}
         </p>
+
+        <button
+            id="detail-wishlist-button"
+            class="detail-wishlist-button ${
+                wishlisted
+                    ? "active"
+                    : ""
+            }"
+            type="button"
+        >
+            ${
+                wishlisted
+                    ? "♥ Tersimpan di wishlist"
+                    : "♡ Tambah ke wishlist"
+            }
+        </button>
 
         <div class="specifications">
 
             <div class="spec-item">
+
                 <span class="spec-label">
                     Jenis
                 </span>
 
-                ${escapeHtml(product.jenis)}
+                ${escapeHtml(
+                    product.jenis
+                )}
+
             </div>
 
+
             <div class="spec-item">
+
                 <span class="spec-label">
                     Kategori
                 </span>
 
-                ${escapeHtml(product.kategori)}
+                ${escapeHtml(
+                    product.kategori
+                )}
+
             </div>
 
+
             <div class="spec-item">
+
                 <span class="spec-label">
                     RAM
                 </span>
@@ -420,9 +1725,12 @@ function renderProductDetail(
                     product.ram_gb,
                     "GB"
                 )}
+
             </div>
 
+
             <div class="spec-item">
+
                 <span class="spec-label">
                     Storage
                 </span>
@@ -431,10 +1739,31 @@ function renderProductDetail(
                     product.storage_gb,
                     "GB"
                 )}
+
             </div>
 
         </div>
     `;
+
+
+    const button =
+        document.getElementById(
+            "detail-wishlist-button"
+        );
+
+
+    if (button) {
+
+        button.addEventListener(
+            "click",
+            async () => {
+
+                await toggleWishlist(
+                    product.id
+                );
+            }
+        );
+    }
 }
 
 
@@ -446,18 +1775,25 @@ function renderRecommendations(
     recommendations
 ) {
 
-    recommendationGrid.innerHTML = "";
+    if (!recommendationGrid) {
+
+        return;
+    }
 
 
-    if (
-        recommendations.length === 0
-    ) {
+    recommendationGrid.innerHTML =
+        "";
+
+
+    if (!recommendations.length) {
 
         recommendationGrid.innerHTML = `
             <div class="empty-state">
+
                 <h3>
                     Belum ada rekomendasi
                 </h3>
+
             </div>
         `;
 
@@ -469,11 +1805,21 @@ function renderRecommendations(
         recommendation => {
 
             const card =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
 
             card.className =
                 "product-card";
+
+
+            const reasons =
+                Array.isArray(
+                    recommendation.reasons
+                )
+                    ? recommendation.reasons
+                    : [];
 
 
             card.innerHTML = `
@@ -503,34 +1849,46 @@ function renderRecommendations(
 
                 <div class="similarity">
                     Kemiripan:
-                    ${(recommendation.similarity * 100).toFixed(1)}%
+                    ${(
+                        recommendation.similarity *
+                        100
+                    ).toFixed(1)}%
                 </div>
 
-                <div class="recommendation-reasons">
+                ${
+                    reasons.length
+                        ? `
+                            <div class="recommendation-reasons">
 
-                    <div class="reason-title">
-                        Mengapa direkomendasikan?
-                    </div>
-
-                    ${
-                        recommendation.reasons
-                            .map(reason => `
-                                <div class="reason-item">
-                                    ✓ ${escapeHtml(reason)}
+                                <div class="reason-title">
+                                    Mengapa direkomendasikan?
                                 </div>
-                            `)
-                            .join("")
-                    }
 
-                </div>
+                                ${reasons
+                                    .map(
+                                        reason => `
+                                            <div class="reason-item">
+                                                ✓ ${escapeHtml(
+                                                    reason
+                                                )}
+                                            </div>
+                                        `
+                                    )
+                                    .join("")}
+
+                            </div>
+                        `
+                        : ""
+                }
             `;
 
 
             card.addEventListener(
                 "click",
-                () => openProduct(
-                    recommendation.id
-                )
+                () =>
+                    openProduct(
+                        recommendation.id
+                    )
             );
 
 
@@ -546,38 +1904,45 @@ function renderRecommendations(
 // SEARCH
 // =========================
 
-searchInput.addEventListener(
-    "input",
-    applyFilters
-);
+if (searchInput) {
+
+    searchInput.addEventListener(
+        "input",
+        applyFilters
+    );
+}
 
 
-heroSearch.addEventListener(
-    "input",
-    event => {
+if (heroSearch) {
 
-        searchInput.value =
-            event.target.value;
+    heroSearch.addEventListener(
+        "input",
+        event => {
 
-        applyFilters();
+            if (searchInput) {
 
-        document
-            .getElementById("products")
-            .scrollIntoView({
-                behavior: "smooth"
-            });
-    }
-);
+                searchInput.value =
+                    event.target.value;
+            }
+
+
+            applyFilters();
+        }
+    );
+}
 
 
 // =========================
 // SORT
 // =========================
 
-sortSelect.addEventListener(
-    "change",
-    applyFilters
-);
+if (sortSelect) {
+
+    sortSelect.addEventListener(
+        "change",
+        applyFilters
+    );
+}
 
 
 // =========================
@@ -605,7 +1970,8 @@ categoryButtons.forEach(
 
 
                 activeCategory =
-                    button.dataset.category;
+                    button.dataset.category ||
+                    "";
 
 
                 applyFilters();
@@ -616,27 +1982,145 @@ categoryButtons.forEach(
 
 
 // =========================
-// BACK
+// BACK BUTTON
 // =========================
 
-backButton.addEventListener(
-    "click",
-    () => {
+if (backButton) {
 
-        detailSection.classList.add(
-            "hidden"
+    backButton.addEventListener(
+        "click",
+        () => {
+
+            if (detailSection) {
+
+                detailSection.classList.add(
+                    "hidden"
+                );
+            }
+
+
+            if (productSection) {
+
+                productSection.classList.remove(
+                    "hidden"
+                );
+            }
+
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        }
+    );
+}
+
+
+// =========================
+// THEME
+// =========================
+
+function loadTheme() {
+
+    const savedTheme =
+        localStorage.getItem(
+            "productrec_theme"
         );
 
-        productSection.classList.remove(
-            "hidden"
+
+    setTheme(
+        savedTheme === "dark"
+    );
+}
+
+
+function setTheme(
+    isDark
+) {
+
+    const html =
+        document.documentElement;
+
+
+    if (isDark) {
+
+        html.setAttribute(
+            "data-theme",
+            "dark"
         );
 
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-        });
+    } else {
+
+        html.removeAttribute(
+            "data-theme"
+        );
     }
-);
+
+
+    updateThemeButton(
+        isDark
+    );
+}
+
+
+function updateThemeButton(
+    isDark
+) {
+
+    if (!themeToggle) {
+
+        return;
+    }
+
+
+    themeToggle.textContent =
+        isDark
+            ? "☀️"
+            : "🌙";
+
+
+    themeToggle.setAttribute(
+        "aria-label",
+        isDark
+            ? "Gunakan mode terang"
+            : "Gunakan mode gelap"
+    );
+}
+
+
+function toggleTheme() {
+
+    const html =
+        document.documentElement;
+
+
+    const isDark =
+        html.getAttribute(
+            "data-theme"
+        ) !== "dark";
+
+
+    setTheme(
+        isDark
+    );
+
+
+    localStorage.setItem(
+        "productrec_theme",
+        isDark
+            ? "dark"
+            : "light"
+    );
+}
+
+
+if (themeToggle) {
+
+    themeToggle.addEventListener(
+        "click",
+        toggleTheme
+    );
+}
 
 
 // =========================
@@ -671,15 +2155,17 @@ function formatSpecification(
         value === null ||
         value === undefined
     ) {
+
         return "Tidak tersedia";
     }
+
 
     return `${value} ${unit}`;
 }
 
 
 // =========================
-// SECURITY
+// HTML SECURITY
 // =========================
 
 function escapeHtml(
@@ -687,16 +2173,33 @@ function escapeHtml(
 ) {
 
     return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 }
 
 
 // =========================
-// START APP
+// START APPLICATION
 // =========================
+
+loadTheme();
 
 loadProducts();

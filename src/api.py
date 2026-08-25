@@ -11,6 +11,9 @@ from pydantic import BaseModel
 from src.recommender import ProductRecommender
 from src.relevance import RelevanceEvaluator
 
+from src.auth_routes import router as auth_router
+from src.wishlist_routes import router as wishlist_router
+
 
 # =========================
 # PATH
@@ -97,7 +100,8 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
-
+app.include_router(auth_router)
+app.include_router(wishlist_router)
 
 # =========================
 # STATIC FILES

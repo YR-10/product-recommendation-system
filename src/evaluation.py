@@ -1,7 +1,3 @@
-from src.recommender import ProductRecommender
-from src.relevance import RelevanceEvaluator
-
-
 class RecommendationEvaluator:
 
     def __init__(

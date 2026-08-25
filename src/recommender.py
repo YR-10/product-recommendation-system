@@ -8,8 +8,9 @@ from src.database import get_engine
 
 class ProductRecommender:
 
-    def __init__(self):
+    def __init__(self, feature_mode="combined"):
 
+        self.feature_mode = feature_mode
         self.engine = get_engine()
 
         query = """
@@ -40,11 +41,33 @@ class ProductRecommender:
             + self.products["kategori"]
         )
 
+        self.products["description_features"] = (
+            self.products["deskripsi"]
+        )
+
+        if self.feature_mode == "combined":
+
+            text_data = self.products[
+                "combined_features"
+            ]
+
+        elif self.feature_mode == "description":
+
+            text_data = self.products[
+                "description_features"
+            ]
+
+        else:
+
+            raise ValueError(
+                "feature_mode harus 'combined' atau 'description'"
+            )
+
         self.vectorizer = TfidfVectorizer()
 
         self.tfidf_matrix = (
             self.vectorizer.fit_transform(
-                self.products["combined_features"]
+                text_data
             )
         )
 

@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>ProductRec</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+</head>
+
+<body>
+
+    <header class="navbar">
+
+        <div class="container navbar-content">
+
+            <a
+                href="/"
+                class="logo"
+            >
+                Product<span>Rec</span>
+            </a>
+
+           <nav class="nav-links">
+
+    <a href="/">
+        Home
+    </a>
+
+    <a href="#products">
+        Products
+    </a>
+
+    <a href="#wishlist">
+        Wishlist
+        <span
+            id="wishlist-count"
+            class="wishlist-count"
+        >
+            0
+        </span>
+    </a>
+
+    <span
+        id="user-name"
+        class="user-name hidden"
+    ></span>
+
+    <button
+        id="login-button"
+        class="auth-button"
+        type="button"
+    >
+        Login
+    </button>
+
+    <button
+        id="logout-button"
+        class="auth-button hidden"
+        type="button"
+    >
+        Logout
+    </button>
+
+    <button
+        id="theme-toggle"
+        class="theme-toggle"
+        type="button"
+        aria-label="Ganti tema"
+    >
+        🌙
+    </button>
+
+</nav>
+
+        </div>
+
+    </header>
+
+
+    <main>
+
+        <!-- HERO -->
+
+        <section class="hero">
+
+            <div class="container hero-content">
+
+                <div class="hero-copy">
+
+                    <div class="eyebrow">
+                        AI PRODUCT RECOMMENDATION
+                    </div>
+
+                    <h1>
+                        Temukan produk
+                        <span>yang cocok</span>
+                        untukmu.
+                    </h1>
+
+                    <p>
+                        Jelajahi produk dan temukan
+                        rekomendasi berdasarkan kemiripan
+                        fitur, kategori, dan deskripsi.
+                    </p>
+
+                    <div class="hero-search">
+
+                        <span>⌕</span>
+
+                        <input
+                            type="text"
+                            id="hero-search"
+                            placeholder="Cari laptop, smartphone, headset..."
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="hero-card">
+
+                    <div class="hero-card-label">
+                        RECOMMENDED FOR YOU
+                    </div>
+
+                    <div class="mini-product">
+
+                        <div class="mini-icon">
+                            💻
+                        </div>
+
+                        <div>
+                            <strong>
+                                Laptop Lenovo
+                            </strong>
+
+                            <small>
+                                79.1% similar
+                            </small>
+                        </div>
+
+                    </div>
+
+
+                    <div class="mini-product">
+
+                        <div class="mini-icon">
+                            💻
+                        </div>
+
+                        <div>
+                            <strong>
+                                Laptop HP
+                            </strong>
+
+                            <small>
+                                67.5% similar
+                            </small>
+                        </div>
+
+                    </div>
+
+
+                    <div class="mini-product">
+
+                        <div class="mini-icon">
+                            💻
+                        </div>
+
+                        <div>
+                            <strong>
+                                Laptop Dell
+                            </strong>
+
+                            <small>
+                                60.7% similar
+                            </small>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="container main-content">
+
+            <!-- CATEGORY -->
+
+            <section class="category-section">
+
+                <div class="section-heading">
+
+                    <div>
+                        <span class="section-label">
+                            EXPLORE
+                        </span>
+
+                        <h2>
+                            Jelajahi kategori
+                        </h2>
+                    </div>
+
+                </div>
+
+
+                <div class="category-grid">
+
+                    <button
+                        class="category-button"
+                        data-category=""
+                    >
+                        <span>✨</span>
+                        Semua
+                    </button>
+
+                    <button
+                        class="category-button"
+                        data-category="Elektronik"
+                    >
+                        <span>💻</span>
+                        Elektronik
+                    </button>
+
+                    <button
+                        class="category-button"
+                        data-category="Smartphone"
+                    >
+                        <span>📱</span>
+                        Smartphone
+                    </button>
+
+                    <button
+                        class="category-button"
+                        data-category="Audio"
+                    >
+                        <span>🎧</span>
+                        Audio
+                    </button>
+
+                    <button
+                        class="category-button"
+                        data-category="Peripherals"
+                    >
+                        <span>⌨️</span>
+                        Peripherals
+                    </button>
+
+                    <button
+                        class="category-button"
+                        data-category="Tablet"
+                    >
+                        <span>📲</span>
+                        Tablet
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- PRODUCTS -->
+
+            <section
+                id="products"
+                class="products-section"
+            >
+
+                <div class="section-heading product-heading">
+
+                    <div>
+
+                        <span class="section-label">
+                            COLLECTION
+                        </span>
+
+                        <h2>
+                            Semua produk
+                        </h2>
+
+                        <p id="product-count">
+                            Memuat produk...
+                        </p>
+
+                    </div>
+
+
+                    <div class="product-controls">
+
+    <div class="search-box">
+
+        <span>⌕</span>
+
+        <input
+            type="text"
+            id="search"
+            placeholder="Cari produk..."
+        >
+
+    </div>
+
+    <select id="sort">
+
+        <option value="default">
+            Urutkan
+        </option>
+
+        <option value="price-low">
+            Harga terendah
+        </option>
+
+        <option value="price-high">
+            Harga tertinggi
+        </option>
+
+        <option value="name-az">
+            Nama A-Z
+        </option>
+
+        <option value="name-za">
+            Nama Z-A
+        </option>
+
+    </select>
+
+</div>
+
+                </div>
+
+
+                <div
+                    id="product-grid"
+                    class="product-grid"
+                ></div>
+
+            </section>
+
+
+            <!-- DETAIL -->
+
+            <section
+    id="wishlist"
+    class="wishlist-section"
+>
+
+    <div class="section-heading">
+
+        <div>
+
+            <span class="section-label">
+                SAVED FOR LATER
+            </span>
+
+            <h2>
+                Wishlist
+            </h2>
+
+            <p>
+                Produk yang kamu simpan.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div
+        id="wishlist-grid"
+        class="product-grid"
+    ></div>
+
+</section>
+
+            <section
+                id="product-detail"
+                class="detail-section hidden"
+            >
+
+                <button
+                    id="back-button"
+                    class="back-button"
+                >
+                    ← Kembali ke produk
+                </button>
+
+
+                <div
+                    id="detail-content"
+                    class="detail-card"
+                ></div>
+
+
+                <div class="recommendation-section">
+
+                    <div class="section-heading">
+
+                        <div>
+
+                            <span class="section-label">
+                                FOR YOU
+                            </span>
+
+                            <h2>
+                                Kamu mungkin juga suka
+                            </h2>
+
+                            <p>
+                                Rekomendasi berdasarkan
+                                kemiripan produk.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="recommendation-grid"
+                        class="product-grid"
+                    ></div>
+
+                </div>
+
+            </section>
+
+        </section>
+
+    </main>
+
+
+<!-- =========================
+     LOGIN MODAL
+========================= -->
+
+<div
+    id="auth-modal"
+    class="auth-modal hidden"
+>
+
+    <div class="auth-card">
+
+        <button
+            id="auth-close"
+            class="auth-close"
+            type="button"
+            aria-label="Tutup"
+        >
+            ×
+        </button>
+
+        <span class="section-label">
+            WELCOME BACK
+        </span>
+
+        <h2>
+            Login ke ProductRec
+        </h2>
+
+        <p class="auth-subtitle">
+            Login untuk menyimpan wishlist
+            di akunmu.
+        </p>
+
+        <form id="login-form">
+
+            <label for="login-username">
+                Username
+            </label>
+
+            <input
+                id="login-username"
+                type="text"
+                required
+                autocomplete="username"
+            >
+
+            <label for="login-password">
+                Password
+            </label>
+
+            <input
+                id="login-password"
+                type="password"
+                required
+                autocomplete="current-password"
+            >
+
+            <button
+                type="submit"
+                class="auth-submit"
+            >
+                Login
+            </button>
+
+        </form>
+
+        <p
+            id="login-message"
+            class="auth-message"
+        ></p>
+
+    </div>
+
+</div>
+
+
+<footer class="footer">
+
+        <div class="container">
+
+            <div class="footer-logo">
+                ProductRec
+            </div>
+
+            <p>
+                Content-Based Product Recommendation
+            </p>
+
+        </div>
+
+    </footer>
+
+
+    <script src="/static/app.js"></script>
+
+</body>
+
+</html>

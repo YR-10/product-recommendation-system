@@ -3,13 +3,10 @@ from src.relevance import RelevanceEvaluator
 from src.evaluation import RecommendationEvaluator
 
 
-recommender = ProductRecommender(
-    "data/products_v2.csv"
-)
+recommender = ProductRecommender()
 
 
 relevance_evaluator = RelevanceEvaluator(
-    "data/products_v2.csv",
     threshold=2
 )
 
@@ -37,3 +34,6 @@ if recall is not None:
         "Mean Recall@3:",
         round(recall, 3)
     )
+
+
+recommender.close()
