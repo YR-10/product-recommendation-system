@@ -3,12 +3,36 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
+from src.database import get_engine
+
 
 class ProductRecommender:
 
-    def __init__(self, data_path):
+    def __init__(self):
 
-        self.products = pd.read_csv(data_path)
+        self.engine = get_engine()
+
+        query = """
+        SELECT
+            p.id,
+            p.nama,
+            p.brand,
+            p.jenis,
+            c.nama AS kategori,
+            p.deskripsi,
+            p.ram_gb,
+            p.storage_gb,
+            p.harga
+        FROM products p
+        JOIN categories c
+            ON p.kategori_id = c.id
+        ORDER BY p.id
+        """
+
+        self.products = pd.read_sql(
+            query,
+            self.engine
+        )
 
         self.products["combined_features"] = (
             self.products["nama"] + " "
@@ -27,6 +51,7 @@ class ProductRecommender:
         self.similarity = cosine_similarity(
             self.tfidf_matrix
         )
+
 
     def recommend(self, product_index, top_n=3):
 
@@ -47,3 +72,8 @@ class ProductRecommender:
         ]
 
         return recommendations
+
+
+    def close(self):
+
+        self.engine.dispose()

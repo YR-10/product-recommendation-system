@@ -1,9 +1,7 @@
 from src.recommender import ProductRecommender
 
 
-recommender = ProductRecommender(
-    "data/products_v2.csv"
-)
+recommender = ProductRecommender()
 
 
 recommendations = recommender.recommend(
@@ -27,3 +25,6 @@ for index, score in recommendations:
         "->",
         round(score, 3)
     )
+
+
+recommender.close()
