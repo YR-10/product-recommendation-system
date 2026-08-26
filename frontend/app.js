@@ -6,13 +6,19 @@ const productGrid =
     document.getElementById("product-grid");
 
 const recommendationGrid =
-    document.getElementById("recommendation-grid");
+    document.getElementById(
+        "recommendation-grid"
+    );
 
 const wishlistGrid =
-    document.getElementById("wishlist-grid");
+    document.getElementById(
+        "wishlist-grid"
+    );
 
 const productCount =
-    document.getElementById("product-count");
+    document.getElementById(
+        "product-count"
+    );
 
 const searchInput =
     document.getElementById("search");
@@ -27,19 +33,29 @@ const productSection =
     document.getElementById("products");
 
 const detailSection =
-    document.getElementById("product-detail");
+    document.getElementById(
+        "product-detail"
+    );
 
 const detailContent =
-    document.getElementById("detail-content");
+    document.getElementById(
+        "detail-content"
+    );
 
 const backButton =
-    document.getElementById("back-button");
+    document.getElementById(
+        "back-button"
+    );
 
 const wishlistCount =
-    document.getElementById("wishlist-count");
+    document.getElementById(
+        "wishlist-count"
+    );
 
 const themeToggle =
-    document.getElementById("theme-toggle");
+    document.getElementById(
+        "theme-toggle"
+    );
 
 const categoryButtons =
     document.querySelectorAll(
@@ -48,29 +64,128 @@ const categoryButtons =
 
 
 // =========================
-// AUTH DOM
+// AUTH ELEMENTS
 // =========================
 
 const loginButton =
-    document.getElementById("login-button");
+    document.getElementById(
+        "login-button"
+    );
 
 const logoutButton =
-    document.getElementById("logout-button");
+    document.getElementById(
+        "logout-button"
+    );
+
+const profileButton =
+    document.getElementById(
+        "profile-button"
+    );
 
 const userName =
-    document.getElementById("user-name");
+    document.getElementById(
+        "user-name"
+    );
+
+
+// =========================
+// PROFILE DROPDOWN
+// =========================
+
+const profileDropdown =
+    document.getElementById(
+        "profile-dropdown"
+    );
+
+const dropdownUsername =
+    document.getElementById(
+        "dropdown-username"
+    );
+
+const dropdownEmail =
+    document.getElementById(
+        "dropdown-email"
+    );
+
+const dropdownProfile =
+    document.getElementById(
+        "dropdown-profile"
+    );
+
+const dropdownWishlist =
+    document.getElementById(
+        "dropdown-wishlist"
+    );
+
+const dropdownLogout =
+    document.getElementById(
+        "dropdown-logout"
+    );
+
+
+// =========================
+// LOGIN MODAL
+// =========================
 
 const authModal =
-    document.getElementById("auth-modal");
+    document.getElementById(
+        "auth-modal"
+    );
 
 const authClose =
-    document.getElementById("auth-close");
+    document.getElementById(
+        "auth-close"
+    );
 
 const loginForm =
-    document.getElementById("login-form");
+    document.getElementById(
+        "login-form"
+    );
 
 const loginMessage =
-    document.getElementById("login-message");
+    document.getElementById(
+        "login-message"
+    );
+
+
+// =========================
+// PROFILE MODAL
+// =========================
+
+const profileModal =
+    document.getElementById(
+        "profile-modal"
+    );
+
+const profileClose =
+    document.getElementById(
+        "profile-close"
+    );
+
+const profileLogout =
+    document.getElementById(
+        "profile-logout"
+    );
+
+const profileUsername =
+    document.getElementById(
+        "profile-username"
+    );
+
+const profileEmail =
+    document.getElementById(
+        "profile-email"
+    );
+
+const profileRole =
+    document.getElementById(
+        "profile-role"
+    );
+
+const profileId =
+    document.getElementById(
+        "profile-id"
+    );
 
 
 // =========================
@@ -139,7 +254,8 @@ async function apiRequest(
         ...(options.headers || {})
     };
 
-    const token = getToken();
+    const token =
+        getToken();
 
     if (token) {
 
@@ -157,16 +273,15 @@ async function apiRequest(
         );
 
 
-    // Token invalid / expired
+    // Jangan anggap 401 dari login sebagai
+    // session expired.
     if (
         response.status === 401
         &&
         !url.startsWith("/auth/login")
     ) {
 
-        handleLogout(
-            false
-        );
+        handleLogout(false);
 
         throw new Error(
             "Sesi login sudah berakhir. Silakan login kembali."
@@ -179,7 +294,7 @@ async function apiRequest(
 
 
 // =========================
-// AUTH UI
+// LOGIN MODAL
 // =========================
 
 function openLoginModal() {
@@ -188,18 +303,15 @@ function openLoginModal() {
         return;
     }
 
-
     authModal.classList.remove(
         "hidden"
     );
-
 
     if (loginMessage) {
 
         loginMessage.textContent =
             "";
     }
-
 
     const usernameInput =
         document.getElementById(
@@ -219,12 +331,87 @@ function closeLoginModal() {
         return;
     }
 
-
     authModal.classList.add(
         "hidden"
     );
 }
 
+
+// =========================
+// PROFILE MODAL
+// =========================
+
+function openProfileModal() {
+
+    if (!currentUser) {
+        return;
+    }
+
+    updateAuthUI();
+
+    if (profileModal) {
+
+        profileModal.classList.remove(
+            "hidden"
+        );
+    }
+}
+
+
+function closeProfileModal() {
+
+    if (profileModal) {
+
+        profileModal.classList.add(
+            "hidden"
+        );
+    }
+}
+
+
+// =========================
+// PROFILE DROPDOWN
+// =========================
+
+function openProfileDropdown() {
+
+    if (!profileDropdown) {
+        return;
+    }
+
+    profileDropdown.classList.remove(
+        "hidden"
+    );
+}
+
+
+function closeProfileDropdown() {
+
+    if (!profileDropdown) {
+        return;
+    }
+
+    profileDropdown.classList.add(
+        "hidden"
+    );
+}
+
+
+function toggleProfileDropdown() {
+
+    if (!profileDropdown) {
+        return;
+    }
+
+    profileDropdown.classList.toggle(
+        "hidden"
+    );
+}
+
+
+// =========================
+// AUTH UI
+// =========================
 
 function updateAuthUI() {
 
@@ -232,6 +419,7 @@ function updateAuthUI() {
         Boolean(currentUser);
 
 
+    // Login button
     if (loginButton) {
 
         loginButton.classList.toggle(
@@ -241,6 +429,7 @@ function updateAuthUI() {
     }
 
 
+    // Logout button
     if (logoutButton) {
 
         logoutButton.classList.toggle(
@@ -250,18 +439,96 @@ function updateAuthUI() {
     }
 
 
-    if (userName) {
+    // Profile button
+    if (profileButton) {
 
-        userName.classList.toggle(
+        profileButton.classList.toggle(
             "hidden",
             !loggedIn
         );
 
+        profileButton.textContent =
+            loggedIn
+                ? `👤 ${currentUser.username}`
+                : "";
+    }
+
+
+    // Old user-name element, kalau masih ada
+    if (userName) {
+
+        userName.classList.toggle(
+            "hidden",
+            true
+        );
 
         userName.textContent =
+            "";
+    }
+
+
+    // Profile modal
+    if (profileUsername) {
+
+        profileUsername.textContent =
             loggedIn
-                ? `Hi, ${currentUser.username}`
-                : "";
+                ? currentUser.username
+                : "-";
+    }
+
+
+    if (profileEmail) {
+
+        profileEmail.textContent =
+            loggedIn
+                ? currentUser.email
+                : "-";
+    }
+
+
+    if (profileRole) {
+
+        profileRole.textContent =
+            loggedIn
+                ? currentUser.role
+                : "-";
+    }
+
+
+    if (profileId) {
+
+        profileId.textContent =
+            loggedIn
+                ? currentUser.id
+                : "-";
+    }
+
+
+    // Dropdown
+    if (dropdownUsername) {
+
+        dropdownUsername.textContent =
+            loggedIn
+                ? currentUser.username
+                : "-";
+    }
+
+
+    if (dropdownEmail) {
+
+        dropdownEmail.textContent =
+            loggedIn
+                ? currentUser.email
+                : "-";
+    }
+
+
+    // Kalau logout, dropdown harus tutup
+    if (!loggedIn) {
+
+        closeProfileDropdown();
+
+        closeProfileModal();
     }
 }
 
@@ -322,6 +589,8 @@ async function loadCurrentUser() {
             error
         );
 
+        clearToken();
+
         currentUser = null;
 
         updateAuthUI();
@@ -332,7 +601,7 @@ async function loadCurrentUser() {
 
 
 // =========================
-// LOGIN
+// LOGIN API
 // =========================
 
 async function loginUser(
@@ -431,19 +700,19 @@ function handleLogout(
     updateWishlistCount();
 
 
-    // Render ulang produk supaya icon wishlist kembali ♡
     renderProducts(
         getFilteredProducts()
     );
 
 
-    // Wishlist user hilang dari UI
     renderWishlist();
 
 
     if (closeModal) {
 
         closeLoginModal();
+        closeProfileModal();
+        closeProfileDropdown();
     }
 }
 
@@ -466,7 +735,6 @@ if (loginForm) {
                     "login-username"
                 );
 
-
             const passwordInput =
                 document.getElementById(
                     "login-password"
@@ -477,7 +745,6 @@ if (loginForm) {
                 usernameInput
                     ? usernameInput.value.trim()
                     : "";
-
 
             const password =
                 passwordInput
@@ -506,14 +773,14 @@ if (loginForm) {
                 }
 
 
-                // 1. Login → dapat JWT
+                // 1. Login
                 await loginUser(
                     username,
                     password
                 );
 
 
-                // 2. Validasi token + ambil user
+                // 2. Ambil user berdasarkan JWT
                 const userLoaded =
                     await loadCurrentUser();
 
@@ -528,18 +795,19 @@ if (loginForm) {
                 }
 
 
-                // 3. Ambil wishlist user
+                // 3. Ambil wishlist
                 await loadWishlistFromApi();
 
 
-                // 4. Baru tutup modal
+                // 4. Tutup modal
                 closeLoginModal();
 
 
+                // 5. Bersihkan form
                 loginForm.reset();
 
 
-                // 5. Refresh UI
+                // 6. Refresh UI
                 renderProducts(
                     getFilteredProducts()
                 );
@@ -606,9 +874,7 @@ if (logoutButton) {
 
             event.preventDefault();
 
-            handleLogout(
-                true
-            );
+            handleLogout(true);
         }
     );
 }
@@ -625,6 +891,150 @@ if (authClose) {
         closeLoginModal
     );
 }
+
+
+// =========================
+// PROFILE BUTTON
+// =========================
+
+if (profileButton) {
+
+    profileButton.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+            toggleProfileDropdown();
+        }
+    );
+}
+
+
+// =========================
+// PROFILE DROPDOWN - PROFILE
+// =========================
+
+if (dropdownProfile) {
+
+    dropdownProfile.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+            closeProfileDropdown();
+
+            openProfileModal();
+        }
+    );
+}
+
+
+// =========================
+// PROFILE DROPDOWN - WISHLIST
+// =========================
+
+if (dropdownWishlist) {
+
+    dropdownWishlist.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+            closeProfileDropdown();
+
+            const wishlistSection =
+                document.getElementById(
+                    "wishlist"
+                );
+
+            if (wishlistSection) {
+
+                wishlistSection.scrollIntoView({
+                    behavior: "smooth"
+                });
+            }
+        }
+    );
+}
+
+
+// =========================
+// PROFILE DROPDOWN - LOGOUT
+// =========================
+
+if (dropdownLogout) {
+
+    dropdownLogout.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+            closeProfileDropdown();
+
+            handleLogout(true);
+        }
+    );
+}
+
+
+// =========================
+// PROFILE MODAL - CLOSE
+// =========================
+
+if (profileClose) {
+
+    profileClose.addEventListener(
+        "click",
+        closeProfileModal
+    );
+}
+
+
+// =========================
+// PROFILE MODAL - LOGOUT
+// =========================
+
+if (profileLogout) {
+
+    profileLogout.addEventListener(
+        "click",
+        () => {
+
+            closeProfileModal();
+
+            handleLogout(true);
+        }
+    );
+}
+
+
+// =========================
+// CLICK OUTSIDE PROFILE
+// =========================
+
+document.addEventListener(
+    "click",
+    event => {
+
+        if (
+            profileDropdown &&
+            profileButton &&
+            !profileDropdown.contains(
+                event.target
+            ) &&
+            !profileButton.contains(
+                event.target
+            )
+        ) {
+
+            closeProfileDropdown();
+        }
+    }
+);
 
 
 // =========================
@@ -711,11 +1121,8 @@ async function loadProducts() {
         }
 
 
-        // Cek session login
         await loadCurrentUser();
 
-
-        // Ambil wishlist kalau sudah login
         await loadWishlistFromApi();
 
 
@@ -752,7 +1159,7 @@ async function loadProducts() {
 
 
 // =========================
-// WISHLIST API
+// LOAD WISHLIST
 // =========================
 
 async function loadWishlistFromApi() {
@@ -798,11 +1205,9 @@ async function loadWishlistFromApi() {
 
         updateWishlistCount();
 
-
         renderProducts(
             getFilteredProducts()
         );
-
 
         renderWishlist();
 
@@ -986,8 +1391,6 @@ async function toggleWishlist(
         renderWishlist();
 
 
-        // Kalau sedang di detail produk,
-        // refresh tombol wishlist
         const product =
             products.find(
                 item =>
@@ -997,10 +1400,8 @@ async function toggleWishlist(
 
 
         if (
-            product
-            &&
-            detailSection
-            &&
+            product &&
+            detailSection &&
             !detailSection.classList.contains(
                 "hidden"
             )
@@ -1018,7 +1419,6 @@ async function toggleWishlist(
             "Wishlist error:",
             error
         );
-
 
         alert(
             error.message
@@ -1232,27 +1632,19 @@ function getFilteredProducts() {
                     ||
                     product.nama
                         .toLowerCase()
-                        .includes(
-                            keyword
-                        )
+                        .includes(keyword)
                     ||
                     product.brand
                         .toLowerCase()
-                        .includes(
-                            keyword
-                        )
+                        .includes(keyword)
                     ||
                     product.kategori
                         .toLowerCase()
-                        .includes(
-                            keyword
-                        )
+                        .includes(keyword)
                     ||
                     product.jenis
                         .toLowerCase()
-                        .includes(
-                            keyword
-                        );
+                        .includes(keyword);
 
 
                 const matchesCategory =
@@ -1263,8 +1655,7 @@ function getFilteredProducts() {
 
 
                 return (
-                    matchesKeyword
-                    &&
+                    matchesKeyword &&
                     matchesCategory
                 );
             }
@@ -1924,7 +2315,6 @@ if (heroSearch) {
                 searchInput.value =
                     event.target.value;
             }
-
 
             applyFilters();
         }
