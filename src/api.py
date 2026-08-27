@@ -14,6 +14,10 @@ from src.relevance import RelevanceEvaluator
 from src.auth_routes import router as auth_router
 from src.wishlist_routes import router as wishlist_router
 
+from src.auth_routes import router as auth_router
+from src.wishlist_routes import router as wishlist_router
+
+from src.admin_routes import router as admin_router
 
 # =========================
 # PATH
@@ -102,6 +106,7 @@ app = FastAPI(
 )
 app.include_router(auth_router)
 app.include_router(wishlist_router)
+app.include_router(admin_router)
 
 # =========================
 # STATIC FILES
@@ -125,6 +130,16 @@ def home():
         FRONTEND_DIR / "index.html"
     )
 
+# =========================
+# ADMIN PAGE
+# =========================
+
+@app.get("/admin")
+def admin_page():
+
+    return FileResponse(
+        FRONTEND_DIR / "admin.html"
+    )
 
 # =========================
 # HEALTH

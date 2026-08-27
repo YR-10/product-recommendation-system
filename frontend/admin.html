@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>ProductRec Admin</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/admin.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================
+         ADMIN LAYOUT
+    ========================= -->
+
+    <div class="admin-layout">
+
+
+        <!-- =========================
+             SIDEBAR
+        ========================= -->
+
+        <aside class="admin-sidebar">
+
+
+            <div class="admin-brand">
+
+                <a href="/">
+                    Product<span>Rec</span>
+                </a>
+
+                <small>
+                    ADMIN PANEL
+                </small>
+
+            </div>
+
+
+            <nav class="admin-nav">
+
+
+                <button
+                    class="admin-nav-item active"
+                    data-section="dashboard"
+                    type="button"
+                >
+                    <span>▦</span>
+                    Dashboard
+                </button>
+
+
+                <button
+                    class="admin-nav-item"
+                    data-section="products"
+                    type="button"
+                >
+                    <span>▣</span>
+                    Products
+                </button>
+
+
+                <button
+                    class="admin-nav-item"
+                    data-section="users"
+                    type="button"
+                >
+                    <span>♙</span>
+                    Users
+                </button>
+
+
+            </nav>
+
+
+            <button
+                id="admin-logout"
+                class="admin-logout"
+                type="button"
+            >
+                ↪ Logout
+            </button>
+
+
+        </aside>
+
+
+        <!-- =========================
+             MAIN
+        ========================= -->
+
+        <main class="admin-main">
+
+
+            <!-- =========================
+                 HEADER
+            ========================= -->
+
+            <header class="admin-header">
+
+
+                <div>
+
+                    <span
+                        class="admin-header-label"
+                    >
+                        ADMINISTRATION
+                    </span>
+
+
+                    <h1
+                        id="page-title"
+                    >
+                        Dashboard
+                    </h1>
+
+                </div>
+
+
+                <!-- =========================
+                     ADMIN PROFILE
+                ========================= -->
+
+                <div class="admin-profile">
+
+
+                    <button
+                        id="admin-user"
+                        class="admin-user"
+                        type="button"
+                    >
+                        Loading...
+                    </button>
+
+
+                    <div
+                        id="admin-profile-menu"
+                        class="admin-profile-menu hidden"
+                    >
+
+
+                        <div class="admin-profile-info">
+
+
+                            <strong
+                                id="admin-menu-username"
+                            >
+                                admin
+                            </strong>
+
+
+                            <span
+                                id="admin-menu-email"
+                            >
+                                -
+                            </span>
+
+
+                        </div>
+
+
+                        <div
+                            class="admin-profile-divider"
+                        ></div>
+
+
+                        <button
+                            id="admin-menu-logout"
+                            class="admin-menu-logout"
+                            type="button"
+                        >
+                            ↪ Logout
+                        </button>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </header>
+
+
+            <!-- =========================
+                 DASHBOARD SECTION
+            ========================= -->
+
+            <section
+                id="section-dashboard"
+                class="admin-section"
+            >
+
+
+                <div class="stats-grid">
+
+
+                    <div class="stat-card">
+
+                        <span class="stat-label">
+                            Total Products
+                        </span>
+
+
+                        <strong
+                            id="total-products"
+                        >
+                            -
+                        </strong>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <span class="stat-label">
+                            Categories
+                        </span>
+
+
+                        <strong
+                            id="total-categories"
+                        >
+                            -
+                        </strong>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <span class="stat-label">
+                            Admin Status
+                        </span>
+
+
+                        <strong>
+                            Active
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="admin-panel">
+
+
+                    <div class="panel-heading">
+
+
+                        <div>
+
+                            <span
+                                class="admin-header-label"
+                            >
+                                OVERVIEW
+                            </span>
+
+
+                            <h2>
+                                Product Management
+                            </h2>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <p class="panel-description">
+                        Kelola produk ProductRec
+                        melalui dashboard admin.
+                    </p>
+
+
+                </div>
+
+
+            </section>
+
+
+            <!-- =========================
+                 PRODUCTS SECTION
+            ========================= -->
+
+            <section
+                id="section-products"
+                class="admin-section hidden"
+            >
+
+
+                <div class="section-topbar">
+
+
+                    <div>
+
+                        <span
+                            class="admin-header-label"
+                        >
+                            CATALOG
+                        </span>
+
+
+                        <h2>
+                            Products
+                        </h2>
+
+                    </div>
+
+
+                    <button
+                        id="add-product-button"
+                        class="primary-button"
+                        type="button"
+                    >
+                        + Tambah Produk
+                    </button>
+
+
+                </div>
+
+
+                <div class="admin-panel">
+
+
+                    <!-- =========================
+                         PRODUCT TOOLBAR
+                    ========================= -->
+
+                    <div class="product-toolbar">
+
+
+                        <div class="admin-search-box">
+
+                            <span>
+                                ⌕
+                            </span>
+
+
+                            <input
+                                id="admin-product-search"
+                                type="text"
+                                placeholder="Cari produk..."
+                            >
+
+                        </div>
+
+
+                        <select
+                            id="admin-category-filter"
+                            class="admin-filter"
+                        >
+
+                            <option value="">
+                                Semua kategori
+                            </option>
+
+                        </select>
+
+
+                    </div>
+
+
+                    <!-- =========================
+                         PRODUCT TABLE
+                    ========================= -->
+
+                    <div
+                        id="product-table-container"
+                    >
+
+                        <p class="loading-text">
+                            Memuat produk...
+                        </p>
+
+                    </div>
+
+
+                    <!-- =========================
+                         PAGINATION
+                    ========================= -->
+
+                    <div
+                        id="product-pagination"
+                        class="product-pagination"
+                    ></div>
+
+
+                </div>
+
+
+            </section>
+
+
+            <!-- =========================
+                 USERS SECTION
+            ========================= -->
+
+            <section
+                id="section-users"
+                class="admin-section hidden"
+            >
+
+
+                <div>
+
+
+                    <span
+                        class="admin-header-label"
+                    >
+                        ACCOUNTS
+                    </span>
+
+
+                    <h2>
+                        Users
+                    </h2>
+
+
+                </div>
+
+
+                <div class="admin-panel">
+
+
+                    <p class="panel-description">
+                        User management akan kita
+                        tambahkan setelah product
+                        management selesai.
+                    </p>
+
+
+                </div>
+
+
+            </section>
+
+
+        </main>
+
+
+    </div>
+
+
+    <!-- =========================
+         PRODUCT MODAL
+    ========================= -->
+
+    <div
+        id="product-modal"
+        class="admin-modal hidden"
+    >
+
+
+        <div class="admin-modal-card">
+
+
+            <button
+                id="product-modal-close"
+                class="admin-modal-close"
+                type="button"
+                aria-label="Tutup"
+            >
+                ×
+            </button>
+
+
+            <span class="admin-header-label">
+                PRODUCT MANAGEMENT
+            </span>
+
+
+            <h2
+                id="product-modal-title"
+            >
+                Tambah Produk
+            </h2>
+
+
+            <form
+                id="product-form"
+            >
+
+
+                <input
+                    type="hidden"
+                    id="product-id"
+                >
+
+
+                <!-- PRODUCT NAME -->
+
+                <label
+                    for="product-name"
+                >
+                    Nama Produk
+                </label>
+
+
+                <input
+                    id="product-name"
+                    type="text"
+                    required
+                >
+
+
+                <!-- BRAND -->
+
+                <label
+                    for="product-brand"
+                >
+                    Brand
+                </label>
+
+
+                <input
+                    id="product-brand"
+                    type="text"
+                    required
+                >
+
+
+                <!-- TYPE -->
+
+                <label
+                    for="product-type"
+                >
+                    Jenis
+                </label>
+
+
+                <input
+                    id="product-type"
+                    type="text"
+                    required
+                >
+
+
+                <!-- CATEGORY -->
+
+                <label
+                    for="product-category"
+                >
+                    Kategori
+                </label>
+
+
+                <select
+                    id="product-category"
+                    required
+                ></select>
+
+
+                <!-- DESCRIPTION -->
+
+                <label
+                    for="product-description"
+                >
+                    Deskripsi
+                </label>
+
+
+                <textarea
+                    id="product-description"
+                    rows="4"
+                    required
+                ></textarea>
+
+
+                <!-- RAM + STORAGE -->
+
+                <div class="form-row">
+
+
+                    <div>
+
+
+                        <label
+                            for="product-ram"
+                        >
+                            RAM (GB)
+                        </label>
+
+
+                        <input
+                            id="product-ram"
+                            type="number"
+                            min="0"
+                        >
+
+
+                    </div>
+
+
+                    <div>
+
+
+                        <label
+                            for="product-storage"
+                        >
+                            Storage (GB)
+                        </label>
+
+
+                        <input
+                            id="product-storage"
+                            type="number"
+                            min="0"
+                        >
+
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- PRICE -->
+
+                <label
+                    for="product-price"
+                >
+                    Harga
+                </label>
+
+
+                <input
+                    id="product-price"
+                    type="number"
+                    min="0"
+                    required
+                >
+
+
+                <!-- MESSAGE -->
+
+                <p
+                    id="product-form-message"
+                    class="form-message"
+                ></p>
+
+
+                <!-- SUBMIT -->
+
+                <button
+                    id="product-submit-button"
+                    class="primary-button"
+                    type="submit"
+                >
+                    Simpan Produk
+                </button>
+
+
+            </form>
+
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =========================
+         SCRIPT
+    ========================= -->
+
+    <script src="/static/admin.js"></script>
+
+</body>
+
+</html>

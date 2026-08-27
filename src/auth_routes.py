@@ -1,7 +1,22 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from pydantic import BaseModel, EmailStr
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    status
+)
+
+from fastapi.security import (
+    OAuth2PasswordBearer,
+    OAuth2PasswordRequestForm
+)
+
+from pydantic import (
+    BaseModel,
+    EmailStr
+)
+
 from sqlalchemy import text
+
 from jwt.exceptions import InvalidTokenError
 
 from src.auth import (
@@ -10,8 +25,13 @@ from src.auth import (
     hash_password,
     verify_password
 )
+
 from src.database import get_engine
 
+
+# =========================
+# ROUTER
+# =========================
 
 router = APIRouter(
     prefix="/auth",
@@ -249,7 +269,10 @@ def get_current_user(
             token
         )
 
-        user_id = payload.get("sub")
+
+        user_id = payload.get(
+            "sub"
+        )
 
 
         if not user_id:
@@ -325,7 +348,28 @@ def get_current_user(
 
 
 # =========================
-# ME
+# REQUIRE ADMIN
+# =========================
+
+def require_admin(
+    current_user: dict = Depends(
+        get_current_user
+    )
+):
+
+    if current_user["role"] != "admin":
+
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required."
+        )
+
+
+    return current_user
+
+
+# =========================
+# CURRENT USER ENDPOINT
 # =========================
 
 @router.get(
@@ -339,3 +383,26 @@ def get_me(
 ):
 
     return current_user
+
+
+# =========================
+# ADMIN TEST ENDPOINT
+# =========================
+
+@router.get(
+    "/admin-test"
+)
+def admin_test(
+    current_admin: dict = Depends(
+        require_admin
+    )
+):
+
+    return {
+        "message": "Admin access granted.",
+        "user": {
+            "id": current_admin["id"],
+            "username": current_admin["username"],
+            "role": current_admin["role"]
+        }
+    }
