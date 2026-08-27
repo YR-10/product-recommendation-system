@@ -75,6 +75,16 @@ const totalCategories =
         "total-categories"
     );
 
+    const totalUsers =
+    document.getElementById(
+        "total-users"
+    );
+
+const userTableContainer =
+    document.getElementById(
+        "user-table-container"
+    );
+
 
 // Product management
 const addProductButton =
@@ -408,6 +418,46 @@ async function loadCategories() {
     );
 }
 
+// =========================
+// LOAD USERS
+// =========================
+
+async function loadUsers() {
+
+    const response =
+        await adminRequest(
+            "/admin/users"
+        );
+
+
+    if (!response) {
+        return;
+    }
+
+
+    const data =
+        await response.json();
+
+
+    const users =
+        Array.isArray(
+            data.users
+        )
+            ? data.users
+            : [];
+
+
+    if (totalUsers) {
+
+        totalUsers.textContent =
+            users.length;
+    }
+
+
+    renderUsers(
+        users
+    );
+}
 
 // =========================
 // CATEGORY FILTER
@@ -586,6 +636,106 @@ function applyAdminProductFilters() {
     );
 }
 
+// =========================
+// RENDER USERS
+// =========================
+
+function renderUsers(
+    users
+) {
+
+    if (!userTableContainer) {
+        return;
+    }
+
+
+    if (!users.length) {
+
+        userTableContainer.innerHTML = `
+            <p class="loading-text">
+                Belum ada user.
+            </p>
+        `;
+
+        return;
+    }
+
+
+    userTableContainer.innerHTML = `
+
+        <div class="admin-table-wrapper">
+
+            <table class="admin-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>ID</th>
+
+                        <th>Username</th>
+
+                        <th>Email</th>
+
+                        <th>Role</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    ${users.map(
+                        user => `
+
+                            <tr>
+
+                                <td>
+                                    ${user.id}
+                                </td>
+
+                                <td>
+                                    ${escapeHtml(
+                                        user.username
+                                    )}
+                                </td>
+
+                                <td>
+                                    ${escapeHtml(
+                                        user.email
+                                    )}
+                                </td>
+
+                                <td>
+
+                                    <span
+                                        class="role-badge ${
+                                            user.role ===
+                                            "admin"
+                                                ? "role-admin"
+                                                : "role-user"
+                                        }"
+                                    >
+                                        ${escapeHtml(
+                                            user.role
+                                        )}
+                                    </span>
+
+                                </td>
+
+                            </tr>
+
+                        `
+                    ).join("")}
+
+                </tbody>
+
+            </table>
+
+        </div>
+    `;
+}
 
 // =========================
 // RENDER PRODUCTS
@@ -1743,12 +1893,13 @@ async function initAdmin() {
 
     await loadProducts();
 
-    await loadCategories();
+await loadCategories();
 
+await loadUsers();
 
-    showSection(
-        "dashboard"
-    );
+showSection(
+    "dashboard"
+);
 }
 
 

@@ -12,6 +12,13 @@ PASSWORD = input(
 )
 
 
+if len(PASSWORD) < 8:
+
+    raise ValueError(
+        "Password admin minimal 8 karakter."
+    )
+
+
 password_hash = hash_password(
     PASSWORD
 )

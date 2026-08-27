@@ -624,3 +624,44 @@ def get_admin_categories(
     finally:
 
         engine.dispose()
+
+# =========================
+# GET ADMIN USERS
+# =========================
+
+@router.get("/users")
+def get_admin_users(
+    current_admin: dict = Depends(
+        require_admin
+    )
+):
+
+    engine = get_engine()
+
+    try:
+
+        with engine.connect() as connection:
+
+            rows = connection.execute(
+                text("""
+                    SELECT
+                        id,
+                        username,
+                        email,
+                        role
+                    FROM users
+                    ORDER BY id ASC
+                """)
+            ).mappings().all()
+
+
+        return {
+            "users": [
+                dict(row)
+                for row in rows
+            ]
+        }
+
+    finally:
+
+        engine.dispose()
