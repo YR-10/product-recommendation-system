@@ -1,5 +1,6 @@
 fastapi==0.141.1
 uvicorn==0.52.4
+httpx2
 
 SQLAlchemy==2.0.52
 PyMySQL==1.2.0
